@@ -5,18 +5,21 @@ const { User, Blog, Tag } = require('./sequelize')
 const app = express()
 app.use(bodyParser.json())
 
+// create a user
 app.post('/api/users', (req, res) => {
     User.create(req.body)
         .then(user => res.json(user))
 })
 
+// get all users
 app.get('/api/users', (req, res) => {
     User.findAll().then(users => res.json(users))
 })
 
+// create a blog post
 app.post('/api/blogs', (req, res) => {
     const body = req.body
-
+    // either find a tag with name or create a new one
     const tags = body.tags.map(tag => Tag.findOrCreate({ where: { name: tag.name }, defaults: {name: tag.name }})
                                         .spread((tag, created) => tag))
 
@@ -28,6 +31,7 @@ app.post('/api/blogs', (req, res) => {
         .catch(err => res.status(400).json({ err: `User with id = [${body.userId}] doesn\'t exist.` }))
 })
 
+// find blogs belonging to one user or all blogs
 app.get('/api/blogs/:userId?', (req, res) => {
     let query;
     if(req.params.userId) {
@@ -41,6 +45,7 @@ app.get('/api/blogs/:userId?', (req, res) => {
     return query.then(blogs => res.json(blogs))
 })
 
+// find blogs by tag
 app.get('/api/blogs/:tag/tag', (req, res) => {
     Blog.findAll({
         include: [
