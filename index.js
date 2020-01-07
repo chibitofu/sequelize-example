@@ -7,6 +7,7 @@ app.use(bodyParser.json())
 
 // create a user
 app.post('/api/users', (req, res) => {
+    console.log(req.body)
     User.create(req.body)
         .then(user => res.json(user))
 })
@@ -25,7 +26,7 @@ app.post('/api/blogs', (req, res) => {
 
     User.findById(body.userId)
         .then(() => Blog.create(body))
-        .then(blog => Promise.all(tags).then(storedTags => blog.addTags)).then(() => blog)
+        .then(blog => Promise.all(tags).then(storedTags => blog.addTags(storedTags)).then(() => blog))
         .then(blog => Blog.findOne({ where: {id: blog.id}, includes: [User, Tag]}))
         .then(blogWithAssociations => res.json(blogWithAssociations))
         .catch(err => res.status(400).json({ err: `User with id = [${body.userId}] doesn\'t exist.` }))
